@@ -14,6 +14,8 @@ let transactions = localStorage.getItem('transactions')
   ? getTransactionFromLocalStorage
   : []
 
+console.log(transactions)
+
 function generateID() {
   return Math.floor(Math.random() * 100000000)
 }
@@ -34,7 +36,43 @@ function addTransactionDOM(transaction) {
   list.appendChild(item)
 }
 
-function updateValues() {}
+function updateValues() {
+  console.log(transactions)
+  const amounts = transactions.map(transaction => transaction.amount)
+  console.log(amounts)
+  const total = amounts.reduce((acc, item) => acc + item, 0).toFixed(3)
+
+  const income = amounts
+    .filter(item => item > 0)
+    .reduce((acc, item) => acc + item, 0)
+    .toFixed(2)
+
+  const expense =
+    amounts.filter(item => item < 0).reduce((acc, item) => acc + item, 0) *
+    -(1).toFixed(2)
+
+  balance.innerHTML = `$${total}`
+  moneyPlus.innerHTML = `$${income}`
+  moneyMinus.innerHTML = `$${expense}`
+}
+
+function updateLocalStorage() {
+  localStorage.setItem('transactions', JSON.stringify(transactions))
+}
+
+function removeTransaction(id) {
+  transactions = transactions.filter(transaction => transaction.id !== id)
+  updateLocalStorage()
+  init()
+}
+
+function init() {
+  list.innerHTML = ''
+  transactions.forEach(addTransactionDOM)
+  updateValues()
+}
+
+init()
 
 function addTransaction(e) {
   e.preventDefault()
@@ -53,6 +91,10 @@ function addTransaction(e) {
   transactions.push(transaction)
   addTransactionDOM(transaction)
   updateValues()
+  updateLocalStorage()
+
+  text.value = ''
+  amount.value = ''
 }
 
 form.addEventListener('submit', addTransaction)
